@@ -11,7 +11,7 @@ interface Player {
 export interface Match {
   player1: Player;
   player2?: Player;
-  result?: 'player1' | 'player2' | 'draw';
+  result?: 'player1' | 'player2';
 }
 
 export function useTournament() {
@@ -20,17 +20,14 @@ export function useTournament() {
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isTournamentOver, setIsTournamentOver] = useState(false);
   
-  // Historial de emparejamientos para evitar repeticiones
   const pastPairings = new Set<string>();
 
-  // Calcula el número total de rondas en función de la cantidad de jugadores
   const getNumberOfRounds = () => Math.ceil(Math.log2(players.length));
 
   const addPlayer = (name: string) => {
     setPlayers(prev => [...prev, { id: prev.length + 1, name, points: 0, hasBye: false }]);
   };
 
-  // Crear una clave única para un par de jugadores
   const createPairKey = (id1: number, id2: number) => `${Math.min(id1, id2)}-${Math.max(id1, id2)}`;
 
   const selectByePlayer = () => {
@@ -84,12 +81,13 @@ export function useTournament() {
     }
   };
 
+  // Actualiza el resultado de un partido y transfiere los puntos al nuevo ganador
   const recordMatchResult = (round: number, matchIndex: number, result: 'player1' | 'player2') => {
     setMatches(prevMatches => {
       const updatedMatches = [...prevMatches];
       const match = updatedMatches[round][matchIndex];
       
-      // Si ya hay un resultado previo, eliminar los puntos asignados al ganador anterior
+      // Quitar puntos del ganador anterior si ya había un resultado registrado
       if (match.result) {
         setPlayers(prevPlayers =>
           prevPlayers.map(player => {
@@ -104,10 +102,10 @@ export function useTournament() {
         );
       }
 
-      // Actualiza el resultado con el nuevo ganador
+      // Actualizar el resultado en el estado de los matches
       match.result = result;
 
-      // Asigna puntos al nuevo ganador
+      // Asignar puntos al nuevo ganador
       setPlayers(prevPlayers =>
         prevPlayers.map(player => {
           if (result === 'player1' && player.id === match.player1.id) {
