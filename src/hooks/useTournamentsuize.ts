@@ -10,7 +10,7 @@ interface Player {
 
 export interface Match {
   player1: Player;
-  player2?: Player; // El jugador 2 puede ser undefined si es un bye
+  player2?: Player;
   result?: 'player1' | 'player2' | 'draw';
 }
 
@@ -26,31 +26,25 @@ export function useTournament() {
   // Calcula el número total de rondas en función de la cantidad de jugadores
   const getNumberOfRounds = () => Math.ceil(Math.log2(players.length));
 
-  // Añadir un jugador al torneo
   const addPlayer = (name: string) => {
     setPlayers(prev => [...prev, { id: prev.length + 1, name, points: 0, hasBye: false }]);
   };
 
-  // Crear una clave única para un par de jugadores para evitar repeticiones
+  // Crear una clave única para un par de jugadores
   const createPairKey = (id1: number, id2: number) => `${Math.min(id1, id2)}-${Math.max(id1, id2)}`;
 
-  // Seleccionar el jugador con menos puntos para el bye, o al azar si hay empate en puntaje
   const selectByePlayer = () => {
     const eligiblePlayers = players.filter(player => !player.hasBye);
     const minPoints = Math.min(...eligiblePlayers.map(player => player.points));
     const lowestScoringPlayers = eligiblePlayers.filter(player => player.points === minPoints);
-    
-    // Seleccionar al azar si hay varios jugadores con el mismo puntaje mínimo
     return lowestScoringPlayers[Math.floor(Math.random() * lowestScoringPlayers.length)];
   };
 
-  // Emparejamiento para la ronda actual
   const generatePairings = () => {
     const sortedPlayers = [...players].sort((a, b) => b.points - a.points || Math.random() - 0.5);
     const roundMatches: Match[] = [];
     const pairedPlayers = new Set<number>();
 
-    // Si el número de jugadores es impar, asignamos el bye al jugador con menos puntos
     if (sortedPlayers.length % 2 !== 0) {
       const byePlayer = selectByePlayer();
       if (byePlayer) {
@@ -61,7 +55,6 @@ export function useTournament() {
       }
     }
 
-    // Emparejar jugadores según puntos, evitando repeticiones de encuentros
     for (let i = 0; i < sortedPlayers.length; i++) {
       const player1 = sortedPlayers[i];
       if (pairedPlayers.has(player1.id)) continue;
@@ -70,7 +63,6 @@ export function useTournament() {
         const player2 = sortedPlayers[j];
         const pairKey = createPairKey(player1.id, player2.id);
 
-        // Verificar si los jugadores ya están emparejados o ya se enfrentaron
         if (!pairedPlayers.has(player2.id) && !pastPairings.has(pairKey)) {
           roundMatches.push({ player1, player2 });
           pairedPlayers.add(player1.id);
@@ -83,7 +75,6 @@ export function useTournament() {
     setMatches(prev => [...prev, roundMatches]);
   };
 
-  // Inicia la siguiente ronda
   const startNextRound = () => {
     if (currentRound < getNumberOfRounds()) {
       generatePairings();
@@ -93,19 +84,37 @@ export function useTournament() {
     }
   };
 
-  // Registrar el resultado de una partida
-  const recordMatchResult = (round: number, matchIndex: number, result: 'player1' | 'player2' | 'draw') => {
+  const recordMatchResult = (round: number, matchIndex: number, result: 'player1' | 'player2') => {
     setMatches(prevMatches => {
       const updatedMatches = [...prevMatches];
-      updatedMatches[round][matchIndex] = { ...updatedMatches[round][matchIndex], result };
+      const match = updatedMatches[round][matchIndex];
+      
+      // Si ya hay un resultado previo, eliminar los puntos asignados al ganador anterior
+      if (match.result) {
+        setPlayers(prevPlayers =>
+          prevPlayers.map(player => {
+            if (match.result === 'player1' && player.id === match.player1.id) {
+              return { ...player, points: player.points - 3 };
+            }
+            if (match.result === 'player2' && match.player2 && player.id === match.player2.id) {
+              return { ...player, points: player.points - 3 };
+            }
+            return player;
+          })
+        );
+      }
 
-      const { player1, player2 } = updatedMatches[round][matchIndex];
+      // Actualiza el resultado con el nuevo ganador
+      match.result = result;
+
+      // Asigna puntos al nuevo ganador
       setPlayers(prevPlayers =>
         prevPlayers.map(player => {
-          if (result === 'player1' && player.id === player1.id) return { ...player, points: player.points + 3 };
-          if (result === 'player2' && player2 && player.id === player2.id) return { ...player, points: player.points + 3 };
-          if (result === 'draw' && (player.id === player1.id || (player2 && player.id === player2.id))) {
-            return { ...player, points: player.points + 1 };
+          if (result === 'player1' && player.id === match.player1.id) {
+            return { ...player, points: player.points + 3 };
+          }
+          if (result === 'player2' && match.player2 && player.id === match.player2.id) {
+            return { ...player, points: player.points + 3 };
           }
           return player;
         })
@@ -115,12 +124,10 @@ export function useTournament() {
     });
   };
 
-  // Finalizar el torneo
   const endTournament = () => {
     setIsTournamentOver(true);
   };
 
-  // Obtener jugadores ordenados por puntos
   const rankedPlayers = () => {
     return [...players].sort((a, b) => b.points - a.points);
   };
@@ -135,6 +142,6 @@ export function useTournament() {
     isTournamentOver,
     endTournament,
     rankedPlayers,
-    getNumberOfRounds // Exportamos getNumberOfRounds
+    getNumberOfRounds
   };
 }
