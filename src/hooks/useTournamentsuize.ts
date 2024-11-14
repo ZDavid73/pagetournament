@@ -20,15 +20,11 @@ export function useTournament() {
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isTournamentOver, setIsTournamentOver] = useState(false);
   
-  const pastPairings = new Set<string>();
-
   const getNumberOfRounds = () => Math.ceil(Math.log2(players.length));
 
   const addPlayer = (name: string) => {
     setPlayers(prev => [...prev, { id: prev.length + 1, name, points: 0, hasBye: false }]);
   };
-
-  const createPairKey = (id1: number, id2: number) => `${Math.min(id1, id2)}-${Math.max(id1, id2)}`;
 
   const selectByePlayer = () => {
     const eligiblePlayers = players.filter(player => !player.hasBye);
@@ -58,13 +54,10 @@ export function useTournament() {
 
       for (let j = i + 1; j < sortedPlayers.length; j++) {
         const player2 = sortedPlayers[j];
-        const pairKey = createPairKey(player1.id, player2.id);
-
-        if (!pairedPlayers.has(player2.id) && !pastPairings.has(pairKey)) {
+        if (!pairedPlayers.has(player2.id)) {
           roundMatches.push({ player1, player2 });
           pairedPlayers.add(player1.id);
           pairedPlayers.add(player2.id);
-          pastPairings.add(pairKey);
           break;
         }
       }
@@ -81,7 +74,6 @@ export function useTournament() {
     }
   };
 
-  // Actualiza el resultado de un partido y transfiere los puntos al nuevo ganador
   const recordMatchResult = (round: number, matchIndex: number, result: 'player1' | 'player2') => {
     setMatches(prevMatches => {
       const updatedMatches = [...prevMatches];
@@ -119,7 +111,6 @@ export function useTournament() {
     });
   };
 
-  // Función para limpiar el resultado de una partida
   const clearMatchResult = (round: number, matchIndex: number) => {
     setMatches(prevMatches => {
       const updatedMatches = [...prevMatches];
@@ -139,7 +130,7 @@ export function useTournament() {
         );
       }
 
-      match.result = undefined; // Limpia el resultado en el estado de los matches
+      match.result = undefined;
 
       return updatedMatches;
     });

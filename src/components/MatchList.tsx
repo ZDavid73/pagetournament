@@ -6,18 +6,16 @@ interface MatchListProps {
   matches: Match[];
   currentRound: number;
   onRecordResult: (matchIndex: number, result: 'player1' | 'player2') => void;
-  onClearResult: (matchIndex: number) => void; // Nueva función para corregir
+  onClearResult: (matchIndex: number) => void;
 }
 
 const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordResult, onClearResult }) => {
   const [selectedResults, setSelectedResults] = useState<(string | null)[]>([]);
 
-  // Resetea el estado de selección al comenzar una nueva ronda
   useEffect(() => {
     setSelectedResults(matches.map(() => null));
   }, [currentRound, matches]);
 
-  // Maneja la selección del resultado
   const handleSelectResult = (matchIndex: number, result: 'player1' | 'player2') => {
     onRecordResult(matchIndex, result);
     setSelectedResults(prevResults => {
@@ -27,12 +25,11 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
     });
   };
 
-  // Maneja la corrección del resultado
   const handleCorrection = (matchIndex: number) => {
-    onClearResult(matchIndex); // Llama a la función de corrección del hook
+    onClearResult(matchIndex);
     setSelectedResults(prevResults => {
       const updatedResults = [...prevResults];
-      updatedResults[matchIndex] = null; // Limpia el resultado en el estado local
+      updatedResults[matchIndex] = null;
       return updatedResults;
     });
   };
@@ -60,7 +57,7 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
                 Gana {match.player2.name}
               </button>
               <button
-                onClick={() => handleCorrection(index)} // Botón de corrección
+                onClick={() => handleCorrection(index)}
                 disabled={selectedResults[index] === null} // Deshabilitado si no hay selección
               >
                 Corregir
