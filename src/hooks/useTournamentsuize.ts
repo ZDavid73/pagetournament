@@ -87,7 +87,6 @@ export function useTournament() {
       const updatedMatches = [...prevMatches];
       const match = updatedMatches[round][matchIndex];
       
-      // Quitar puntos del ganador anterior si ya había un resultado registrado
       if (match.result) {
         setPlayers(prevPlayers =>
           prevPlayers.map(player => {
@@ -102,10 +101,8 @@ export function useTournament() {
         );
       }
 
-      // Actualizar el resultado en el estado de los matches
       match.result = result;
 
-      // Asignar puntos al nuevo ganador
       setPlayers(prevPlayers =>
         prevPlayers.map(player => {
           if (result === 'player1' && player.id === match.player1.id) {
@@ -117,6 +114,32 @@ export function useTournament() {
           return player;
         })
       );
+
+      return updatedMatches;
+    });
+  };
+
+  // Función para limpiar el resultado de una partida
+  const clearMatchResult = (round: number, matchIndex: number) => {
+    setMatches(prevMatches => {
+      const updatedMatches = [...prevMatches];
+      const match = updatedMatches[round][matchIndex];
+
+      if (match.result) {
+        setPlayers(prevPlayers =>
+          prevPlayers.map(player => {
+            if (match.result === 'player1' && player.id === match.player1.id) {
+              return { ...player, points: player.points - 3 };
+            }
+            if (match.result === 'player2' && match.player2 && player.id === match.player2.id) {
+              return { ...player, points: player.points - 3 };
+            }
+            return player;
+          })
+        );
+      }
+
+      match.result = undefined; // Limpia el resultado en el estado de los matches
 
       return updatedMatches;
     });
@@ -137,6 +160,7 @@ export function useTournament() {
     currentRound,
     startNextRound,
     recordMatchResult,
+    clearMatchResult, // Exportamos clearMatchResult
     isTournamentOver,
     endTournament,
     rankedPlayers,

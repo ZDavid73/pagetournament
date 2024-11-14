@@ -6,9 +6,10 @@ interface MatchListProps {
   matches: Match[];
   currentRound: number;
   onRecordResult: (matchIndex: number, result: 'player1' | 'player2') => void;
+  onClearResult: (matchIndex: number) => void; // Nueva función para corregir
 }
 
-const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordResult }) => {
+const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordResult, onClearResult }) => {
   const [selectedResults, setSelectedResults] = useState<(string | null)[]>([]);
 
   // Resetea el estado de selección al comenzar una nueva ronda
@@ -16,12 +17,22 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
     setSelectedResults(matches.map(() => null));
   }, [currentRound, matches]);
 
-  // Maneja la selección del resultado y permite corrección
+  // Maneja la selección del resultado
   const handleSelectResult = (matchIndex: number, result: 'player1' | 'player2') => {
-    onRecordResult(matchIndex, result); // Actualiza el puntaje en el hook principal
+    onRecordResult(matchIndex, result);
     setSelectedResults(prevResults => {
       const updatedResults = [...prevResults];
       updatedResults[matchIndex] = result;
+      return updatedResults;
+    });
+  };
+
+  // Maneja la corrección del resultado
+  const handleCorrection = (matchIndex: number) => {
+    onClearResult(matchIndex); // Llama a la función de corrección del hook
+    setSelectedResults(prevResults => {
+      const updatedResults = [...prevResults];
+      updatedResults[matchIndex] = null; // Limpia el resultado en el estado local
       return updatedResults;
     });
   };
@@ -47,6 +58,12 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
                 onClick={() => handleSelectResult(index, 'player2')}
               >
                 Gana {match.player2.name}
+              </button>
+              <button
+                onClick={() => handleCorrection(index)} // Botón de corrección
+                disabled={selectedResults[index] === null} // Deshabilitado si no hay selección
+              >
+                Corregir
               </button>
             </>
           ) : (
