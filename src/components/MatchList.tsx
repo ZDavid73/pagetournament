@@ -5,28 +5,25 @@ import { Match } from '../hooks/useTournamentsuize';
 interface MatchListProps {
   matches: Match[];
   currentRound: number;
-  onRecordResult: (matchIndex: number, result: 'player1' | 'player2' | 'draw') => void;
+  onRecordResult: (matchIndex: number, result: 'player1' | 'player2') => void;
 }
 
 const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordResult }) => {
-  // Estado para almacenar el resultado seleccionado de cada partida por ronda
   const [selectedResults, setSelectedResults] = useState<(string | null)[]>([]);
 
-  // Resetear resultados seleccionados al comenzar una nueva ronda
+  // Resetea el estado de selección al comenzar una nueva ronda
   useEffect(() => {
-    setSelectedResults(matches.map(() => null)); // Resetea el estado al tamaño de las partidas en la ronda actual
+    setSelectedResults(matches.map(() => null));
   }, [currentRound, matches]);
 
-  // Manejar selección de resultado
-  const handleSelectResult = (matchIndex: number, result: 'player1' | 'player2' | 'draw') => {
-    if (selectedResults[matchIndex] === null) {
-      onRecordResult(matchIndex, result);
-      setSelectedResults(prevResults => {
-        const updatedResults = [...prevResults];
-        updatedResults[matchIndex] = result;
-        return updatedResults;
-      });
-    }
+  // Maneja la selección del resultado y permite corrección
+  const handleSelectResult = (matchIndex: number, result: 'player1' | 'player2') => {
+    onRecordResult(matchIndex, result); // Actualiza el puntaje en el hook principal
+    setSelectedResults(prevResults => {
+      const updatedResults = [...prevResults];
+      updatedResults[matchIndex] = result;
+      return updatedResults;
+    });
   };
 
   return (
@@ -42,23 +39,14 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
               <button
                 className={selectedResults[index] === 'player1' ? 'selected' : ''}
                 onClick={() => handleSelectResult(index, 'player1')}
-                disabled={selectedResults[index] !== null}
               >
                 Gana {match.player1.name}
               </button>
               <button
                 className={selectedResults[index] === 'player2' ? 'selected' : ''}
                 onClick={() => handleSelectResult(index, 'player2')}
-                disabled={selectedResults[index] !== null}
               >
                 Gana {match.player2.name}
-              </button>
-              <button
-                className={selectedResults[index] === 'draw' ? 'selected' : ''}
-                onClick={() => handleSelectResult(index, 'draw')}
-                disabled={selectedResults[index] !== null}
-              >
-                Empate
               </button>
             </>
           ) : (

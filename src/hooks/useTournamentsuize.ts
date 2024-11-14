@@ -23,7 +23,7 @@ export function useTournament() {
   // Historial de emparejamientos para evitar repeticiones
   const pastPairings = new Set<string>();
 
-  // Calcular el número de rondas en función de la cantidad de jugadores
+  // Calcula el número total de rondas en función de la cantidad de jugadores
   const getNumberOfRounds = () => Math.ceil(Math.log2(players.length));
 
   // Añadir un jugador al torneo
@@ -134,6 +134,7 @@ export function useTournament() {
     recordMatchResult,
     isTournamentOver,
     endTournament,
-    rankedPlayers
+    rankedPlayers,
+    getNumberOfRounds // Exportamos getNumberOfRounds
   };
 }

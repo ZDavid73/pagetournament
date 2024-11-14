@@ -92,6 +92,9 @@ button:active::before {
 }
 
 /* Botón de resultado seleccionado */
+/* src/App.css */
+
+/* Clase para el botón del ganador seleccionado */
 button.selected {
   background-color: #26de81;
   color: #ffffff;
@@ -102,12 +105,13 @@ button.selected:hover {
   background-color: #2bcbba;
 }
 
-/* Efecto de selección en los botones */
+/* Efecto de selección en el botón */
 @keyframes buttonSelect {
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
+
 
 /* Lista de participantes */
 ul {
