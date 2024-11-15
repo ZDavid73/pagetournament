@@ -26,7 +26,7 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
   };
 
   const handleCorrection = (matchIndex: number) => {
-    onClearResult(matchIndex);
+    onClearResult(matchIndex); // Limpia los puntos y el resultado
     setSelectedResults(prevResults => {
       const updatedResults = [...prevResults];
       updatedResults[matchIndex] = null;

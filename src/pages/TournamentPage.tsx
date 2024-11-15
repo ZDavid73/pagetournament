@@ -14,10 +14,11 @@ const TournamentPage: React.FC = () => {
     currentRound,
     startNextRound,
     recordMatchResult,
+    clearMatchResult,
     isTournamentOver,
     endTournament,
     rankedPlayers,
-    getNumberOfRounds // <- Usar getNumberOfRounds aquí
+    getNumberOfRounds
   } = useTournament();
 
   return (
@@ -28,7 +29,6 @@ const TournamentPage: React.FC = () => {
           <AddPlayerForm onAddPlayer={addPlayer} />
           <PlayerList players={players} />
 
-          {/* Muestra el número total de rondas al inicio */}
           {currentRound === 0 && (
             <>
               <p>Total de Rondas: {getNumberOfRounds()}</p>
@@ -44,6 +44,9 @@ const TournamentPage: React.FC = () => {
                 currentRound={currentRound}
                 onRecordResult={(matchIndex, result) =>
                   recordMatchResult(currentRound - 1, matchIndex, result)
+                }
+                onClearResult={(matchIndex) =>
+                  clearMatchResult(currentRound - 1, matchIndex)
                 }
               />
               <button onClick={startNextRound}>Siguiente Ronda</button>
