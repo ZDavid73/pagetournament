@@ -19,7 +19,7 @@ export function useTournament() {
   const [matches, setMatches] = useState<Match[][]>([]);
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isTournamentOver, setIsTournamentOver] = useState(false);
-  
+
   const getNumberOfRounds = () => Math.ceil(Math.log2(players.length));
 
   const addPlayer = (name: string) => {
@@ -78,7 +78,7 @@ export function useTournament() {
     setMatches(prevMatches => {
       const updatedMatches = [...prevMatches];
       const match = updatedMatches[round][matchIndex];
-      
+
       if (match.result) {
         setPlayers(prevPlayers =>
           prevPlayers.map(player => {
@@ -151,7 +151,7 @@ export function useTournament() {
     currentRound,
     startNextRound,
     recordMatchResult,
-    clearMatchResult, // Exportamos clearMatchResult
+    clearMatchResult,
     isTournamentOver,
     endTournament,
     rankedPlayers,

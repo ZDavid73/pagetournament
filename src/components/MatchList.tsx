@@ -26,7 +26,7 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
   };
 
   const handleCorrection = (matchIndex: number) => {
-    onClearResult(matchIndex); // Limpia los puntos y el resultado
+    onClearResult(matchIndex);
     setSelectedResults(prevResults => {
       const updatedResults = [...prevResults];
       updatedResults[matchIndex] = null;
@@ -58,7 +58,7 @@ const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordRe
               </button>
               <button
                 onClick={() => handleCorrection(index)}
-                disabled={selectedResults[index] === null} // Deshabilitado si no hay selección
+                disabled={selectedResults[index] === null}
               >
                 Corregir
               </button>

@@ -14,7 +14,7 @@ interface PlayerListProps {
 const PlayerList: React.FC<PlayerListProps> = ({ players }) => {
   return (
     <div>
-      <h2>Lista de Participantes</h2>
+      <h2>Lista de Jugadores</h2>
       <ul>
         {players.map(player => (
           <li key={player.id}>
