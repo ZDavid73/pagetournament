@@ -2,7 +2,6 @@
 import React from 'react';
 
 interface Player {
-  id: number;
   name: string;
   points: number;
 }
@@ -13,12 +12,12 @@ interface PlayerListProps {
 
 const PlayerList: React.FC<PlayerListProps> = ({ players }) => {
   return (
-    <div>
-      <h2>Lista de Jugadores</h2>
+    <div className="player-list">
+      <h3>Lista de Jugadores</h3>
       <ul>
-        {players.map(player => (
-          <li key={player.id}>
-            {player.name} - Puntos: {player.points}
+        {players.map((player, index) => (
+          <li key={index}>
+            {player.name} - {player.points} puntos
           </li>
         ))}
       </ul>

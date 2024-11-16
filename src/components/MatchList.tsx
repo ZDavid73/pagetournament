@@ -1,71 +1,43 @@
 // src/components/MatchList.tsx
-import React, { useState, useEffect } from 'react';
-import { Match } from '../hooks/useTournamentsuize';
+import React from 'react';
+
+interface Player {
+  name: string;
+  points: number;
+}
+
+interface Match {
+  player1: Player;
+  player2: Player;
+  result: "player1" | "player2" | "draw" | null;
+}
 
 interface MatchListProps {
   matches: Match[];
   currentRound: number;
-  onRecordResult: (matchIndex: number, result: 'player1' | 'player2') => void;
+  onRecordResult: (matchIndex: number, result: "player1" | "player2" | "draw") => void;
   onClearResult: (matchIndex: number) => void;
 }
 
-const MatchList: React.FC<MatchListProps> = ({ matches, currentRound, onRecordResult, onClearResult }) => {
-  const [selectedResults, setSelectedResults] = useState<(string | null)[]>([]);
-
-  useEffect(() => {
-    setSelectedResults(matches.map(() => null));
-  }, [currentRound, matches]);
-
-  const handleSelectResult = (matchIndex: number, result: 'player1' | 'player2') => {
-    onRecordResult(matchIndex, result);
-    setSelectedResults(prevResults => {
-      const updatedResults = [...prevResults];
-      updatedResults[matchIndex] = result;
-      return updatedResults;
-    });
-  };
-
-  const handleCorrection = (matchIndex: number) => {
-    onClearResult(matchIndex);
-    setSelectedResults(prevResults => {
-      const updatedResults = [...prevResults];
-      updatedResults[matchIndex] = null;
-      return updatedResults;
-    });
-  };
-
+const MatchList: React.FC<MatchListProps> = ({ matches, onRecordResult, onClearResult }) => {
   return (
-    <div>
-      <h2>Emparejamientos de la Ronda {currentRound}</h2>
+    <div className="match-list">
+      <h3>Ronda {matches.length > 0 && matches[0].player1.name} - Resultados</h3>
       {matches.map((match, index) => (
-        <div key={index} style={{ marginBottom: '20px' }}>
-          {match.player2 ? (
+        <div key={index} className="match">
+          <p>
+            {match.player1.name} vs {match.player2.name}
+          </p>
+          {match.result === null ? (
             <>
-              <p>
-                {match.player1.name} vs {match.player2.name}
-              </p>
-              <button
-                className={selectedResults[index] === 'player1' ? 'selected' : ''}
-                onClick={() => handleSelectResult(index, 'player1')}
-              >
-                Gana {match.player1.name}
-              </button>
-              <button
-                className={selectedResults[index] === 'player2' ? 'selected' : ''}
-                onClick={() => handleSelectResult(index, 'player2')}
-              >
-                Gana {match.player2.name}
-              </button>
-              <button
-                onClick={() => handleCorrection(index)}
-                disabled={selectedResults[index] === null}
-              >
-                Corregir
-              </button>
+              <button onClick={() => onRecordResult(index, "player1")}>Ganó {match.player1.name}</button>
+              <button onClick={() => onRecordResult(index, "player2")}>Ganó {match.player2.name}</button>
+              <button onClick={() => onRecordResult(index, "draw")}>Empate</button>
             </>
           ) : (
-            <p>{match.player1.name} tiene un Bye (gana automáticamente)</p>
+            <p>Resultado: {match.result === "player1" ? match.player1.name : match.result === "player2" ? match.player2.name : "Empate"}</p>
           )}
+          <button onClick={() => onClearResult(index)}>Corregir</button>
         </div>
       ))}
     </div>
