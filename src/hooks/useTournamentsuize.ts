@@ -17,10 +17,13 @@ export const useTournament = () => {
   const [matches, setMatches] = useState<Match[][]>([]);
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isTournamentOver, setIsTournamentOver] = useState<boolean>(false);
+  const [isTournamentStarted, setIsTournamentStarted] = useState<boolean>(false);
 
-  // Añadir jugador
+  // Añadir jugador (solo si el torneo no ha comenzado)
   const addPlayer = (name: string) => {
-    setPlayers((prevPlayers) => [...prevPlayers, { name, points: 0 }]);
+    if (!isTournamentStarted) {
+      setPlayers((prevPlayers) => [...prevPlayers, { name, points: 0 }]);
+    }
   };
 
   // Crear partidos de la ronda
@@ -86,11 +89,24 @@ export const useTournament = () => {
 
   // Iniciar la siguiente ronda
   const startNextRound = () => {
+    if (isTournamentOver) return; // No avanzar si el torneo ya terminó
+
+    if (!isTournamentStarted) {
+      setIsTournamentStarted(true); // Marcar el torneo como iniciado
+    }
+
+    // Si alcanzamos el máximo de rondas, finalizamos el torneo
+    const maxRounds = getNumberOfRounds();
+    if (currentRound >= maxRounds) {
+      setIsTournamentOver(true);
+      return;
+    }
+
     setCurrentRound((prevRound) => prevRound + 1);
     generateMatches();
   };
 
-  // Finalizar torneo
+  // Finalizar torneo manualmente
   const endTournament = () => {
     setIsTournamentOver(true);
   };
@@ -100,9 +116,9 @@ export const useTournament = () => {
     return [...players].sort((a, b) => b.points - a.points);
   };
 
-  // Obtener el número de rondas
+  // Obtener el número de rondas necesarias según el sistema suizo
   const getNumberOfRounds = () => {
-    return Math.ceil(Math.log2(players.length)); // Fórmula para calcular el número de rondas en un torneo suizo
+    return Math.ceil(Math.log2(players.length));
   };
 
   return {
@@ -114,6 +130,7 @@ export const useTournament = () => {
     recordMatchResult,
     clearMatchResult,
     isTournamentOver,
+    isTournamentStarted,
     endTournament,
     rankedPlayers,
     getNumberOfRounds,

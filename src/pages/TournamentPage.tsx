@@ -16,9 +16,10 @@ const TournamentPage: React.FC = () => {
     recordMatchResult,
     clearMatchResult,
     isTournamentOver,
+    isTournamentStarted,
     endTournament,
     rankedPlayers,
-    getNumberOfRounds
+    getNumberOfRounds,
   } = useTournament();
 
   return (
@@ -26,7 +27,7 @@ const TournamentPage: React.FC = () => {
       <h1>Torneo TCG - Sistema Suizo</h1>
       {!isTournamentOver ? (
         <>
-          <AddPlayerForm onAddPlayer={addPlayer} />
+          {!isTournamentStarted && <AddPlayerForm onAddPlayer={addPlayer} />}
           <PlayerList players={players} />
 
           {currentRound === 0 && (
@@ -49,7 +50,7 @@ const TournamentPage: React.FC = () => {
                   clearMatchResult(currentRound - 1, matchIndex)
                 }
               />
-              <button onClick={startNextRound}>Siguiente Ronda</button>
+              {!isTournamentOver && <button onClick={startNextRound}>Siguiente Ronda</button>}
               <button onClick={endTournament}>Finalizar Torneo</button>
             </>
           )}
