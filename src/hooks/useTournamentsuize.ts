@@ -2,6 +2,7 @@
 import { useState } from 'react';
 
 interface Player {
+  id: number;
   name: string;
   points: number;
 }
@@ -9,26 +10,29 @@ interface Player {
 interface Match {
   player1: Player;
   player2: Player;
-  result: "player1" | "player2" | "draw" | null; // null significa que no se ha registrado resultado
+  result: "player1" | "player2" | "draw" | null;
 }
 
 export const useTournament = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[][]>([]);
   const [currentRound, setCurrentRound] = useState<number>(0);
-  const [isTournamentOver, setIsTournamentOver] = useState<boolean>(false);
-  const [isTournamentStarted, setIsTournamentStarted] = useState<boolean>(false);
+  const [isTournamentOver, setIsTournamentOver] = useState(false);
+  const [isTournamentStarted, setIsTournamentStarted] = useState(false);
 
-  // Añadir jugador (solo si el torneo no ha comenzado)
+  // Añadir jugador con ID único
   const addPlayer = (name: string) => {
     if (!isTournamentStarted) {
-      setPlayers((prevPlayers) => [...prevPlayers, { name, points: 0 }]);
+      setPlayers((prevPlayers) => [
+        ...prevPlayers,
+        { id: prevPlayers.length + 1, name, points: 0 },
+      ]);
     }
   };
 
-  // Crear partidos de la ronda
+  // Generar partidos para una ronda
   const generateMatches = () => {
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5); // Aleatorizar
+    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
     const roundMatches: Match[] = [];
 
     for (let i = 0; i < shuffledPlayers.length; i += 2) {
@@ -39,31 +43,33 @@ export const useTournament = () => {
           result: null,
         });
       } else {
-        // Jugador sin oponente (Bye)
         roundMatches.push({
           player1: shuffledPlayers[i],
-          player2: shuffledPlayers[i], // El mismo jugador "gana"
+          player2: shuffledPlayers[i], // Bye
           result: "player1",
         });
+        shuffledPlayers[i].points += 3; // Bye automático
       }
     }
+
     setMatches((prevMatches) => [...prevMatches, roundMatches]);
   };
 
-  // Registrar el resultado del partido
-  const recordMatchResult = (roundIndex: number, matchIndex: number, result: "player1" | "player2" | "draw") => {
+  // Registrar el resultado de un partido
+  const recordMatchResult = (
+    roundIndex: number,
+    matchIndex: number,
+    result: "player1" | "player2" | "draw"
+  ) => {
     const newMatches = [...matches];
     const match = newMatches[roundIndex][matchIndex];
 
-    if (match.result === null) {
-      // Solo registrar si no se ha registrado un resultado
+    if (!match.result) {
       match.result = result;
-      if (result === "player1") {
-        match.player1.points += 3;
-      } else if (result === "player2") {
-        match.player2.points += 3;
-      }
+      if (result === "player1") match.player1.points += 3;
+      if (result === "player2") match.player2.points += 3;
     }
+
     setMatches(newMatches);
     setPlayers((prevPlayers) => [...prevPlayers]);
   };
@@ -74,30 +80,20 @@ export const useTournament = () => {
     const match = newMatches[roundIndex][matchIndex];
 
     if (match.result) {
-      // Restaurar los puntos de los jugadores al resultado anterior
-      if (match.result === "player1") {
-        match.player1.points -= 3;
-      } else if (match.result === "player2") {
-        match.player2.points -= 3;
-      }
-
-      match.result = null; // Eliminar el resultado
+      if (match.result === "player1") match.player1.points -= 3;
+      if (match.result === "player2") match.player2.points -= 3;
+      match.result = null;
     }
+
     setMatches(newMatches);
     setPlayers((prevPlayers) => [...prevPlayers]);
   };
 
-  // Iniciar la siguiente ronda
+  // Iniciar una nueva ronda
   const startNextRound = () => {
-    if (isTournamentOver) return; // No avanzar si el torneo ya terminó
+    if (!isTournamentStarted) setIsTournamentStarted(true);
 
-    if (!isTournamentStarted) {
-      setIsTournamentStarted(true); // Marcar el torneo como iniciado
-    }
-
-    // Si alcanzamos el máximo de rondas, finalizamos el torneo
-    const maxRounds = getNumberOfRounds();
-    if (currentRound >= maxRounds) {
+    if (currentRound >= getNumberOfRounds()) {
       setIsTournamentOver(true);
       return;
     }
@@ -106,7 +102,7 @@ export const useTournament = () => {
     generateMatches();
   };
 
-  // Finalizar torneo manualmente
+  // Finalizar el torneo manualmente
   const endTournament = () => {
     setIsTournamentOver(true);
   };
@@ -116,7 +112,7 @@ export const useTournament = () => {
     return [...players].sort((a, b) => b.points - a.points);
   };
 
-  // Obtener el número de rondas necesarias según el sistema suizo
+  // Calcular el número de rondas
   const getNumberOfRounds = () => {
     return Math.ceil(Math.log2(players.length));
   };

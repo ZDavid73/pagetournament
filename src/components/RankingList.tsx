@@ -1,21 +1,26 @@
-// src/components/RankingList.tsx
 import React from 'react';
 
+interface Player {
+  id: number;
+  name: string;
+  points: number;
+}
+
 interface RankingListProps {
-  players: { id: number; name: string; points: number }[];
+  players: Player[];
 }
 
 const RankingList: React.FC<RankingListProps> = ({ players }) => {
   return (
-    <div>
-      <h2>Ranking Final</h2>
-      <ol>
-        {players.map(player => (
+    <div className="ranking-list">
+      <h3>Clasificación Final</h3>
+      <ul>
+        {players.map((player) => (
           <li key={player.id}>
-            {player.name} - Puntos: {player.points}
+            {player.name} - {player.points} puntos
           </li>
         ))}
-      </ol>
+      </ul>
     </div>
   );
 };

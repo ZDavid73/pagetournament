@@ -50,7 +50,7 @@ const TournamentPage: React.FC = () => {
                   clearMatchResult(currentRound - 1, matchIndex)
                 }
               />
-              {!isTournamentOver && <button onClick={startNextRound}>Siguiente Ronda</button>}
+              <button onClick={startNextRound}>Siguiente Ronda</button>
               <button onClick={endTournament}>Finalizar Torneo</button>
             </>
           )}
